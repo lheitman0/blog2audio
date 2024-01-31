@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Extracted Text</h1>
+        <p>{{ text }}</p>
+        <h1>Audio Output</h1>
+        <audio controls>
+            <source src="{{ url_for('static', filename= 'audio_output.mp3') }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <a href="/">Try another URL</a>
+    </div>
+</body>
+</html>
