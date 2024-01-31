@@ -23,16 +23,16 @@ def process_url():
     
     soup = BeautifulSoup(web_content, 'html.parser')
     text = soup.get_text(separator='\n')
-    
-    response = client.audio.speech.create(
+
+    response_audio = client.audio.speech.create(
         model="tts-1",
         voice="onyx",
-        input= text,
+        input= text
     )
 
     audio_path = "static/audio_output.mp3"
     with open(audio_path, "wb") as audio_file:
-        audio_file.write(response.content)
+        audio_file.write(response_audio.content)
     
     
     return render_template('result.html', text=text, audio_path=audio_path)
