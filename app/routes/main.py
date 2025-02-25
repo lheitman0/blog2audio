@@ -108,13 +108,14 @@ def download_audio(content_id):
         mimetype='audio/mpeg'
     )
 
-def process_content_background(content_id, voice):
+def process_content_background(content_id, voice, app=None):
     """
     Background task to process content
     """
     # Import the app outside of the function to avoid circular imports
-    from run import app
-    
+    if app is None:
+        from run import app
+
     # Use the imported app to create a context
     with app.app_context():
         content = AudioContent.query.get(content_id)

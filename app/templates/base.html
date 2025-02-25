@@ -32,10 +32,13 @@
                     <a href="{{ url_for('main.index') }}" class="nav-link">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">About</a>
+                    <a href="{{ url_for('rss.feed_content') }}" class="nav-link">My Audio Feed</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">API</a>
+                    <a href="{{ url_for('rss.list_feeds') }}" class="nav-link">Manage Feeds</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">About</a>
                 </li>
             </ul>
         </nav>

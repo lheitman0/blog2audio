@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}My Audio Feed | Blog2Audio{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>My Audio Feed</h1>
+    <p class="lead">Listen to the latest content from your subscriptions</p>
+    
+    {% if contents %}
+        <div class="audio-feed">
+            {% for item in contents %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ item.title or "Untitled Post" }}</h3>
+                        <div class="meta text-muted mb-3">
+                            <span><i class="fas fa-link"></i> <a href="{{ item.url }}" target="_blank">Original Article</a></span>
+                            {% if item.feed %}
+                                <span class="ms-3"><i class="fas fa-rss"></i> {{ item.feed.title }}</span>
+                            {% endif %}
+                            <span class="ms-3"><i class="fas fa-calendar"></i> {{ item.created_at.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                        
+                        <div class="status-badge mb-3">
+                            {% if item.status == "completed" %}
+                                <span class="badge bg-success">Ready to Play</span>
+                            {% elif item.status == "processing" %}
+                                <span class="badge bg-primary">Processing</span>
+                            {% elif item.status == "pending" %}
+                                <span class="badge bg-secondary">Pending</span>
+                            {% else %}
+                                <span class="badge bg-danger">Error</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if item.status == "completed" and item.file_path %}
+                            <div class="audio-player-wrapper">
+                                <audio controls>
+                                    <source src="{{ item.web_path }}" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                            
+                            <div class="action-buttons mt-3">
+                                <a href="{{ url_for('main.download_audio', content_id=item.id) }}" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        {% elif item.status == "pending" %}
+                            <form action="{{ url_for('rss.process_content', content_id=item.id) }}" method="post">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-headphones"></i> Convert to Audio
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>You don't have any content in your feed yet. Try adding a feed or refreshing your existing feeds.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

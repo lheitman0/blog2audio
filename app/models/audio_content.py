@@ -9,7 +9,6 @@ class AudioContent(db.Model):
     url = db.Column(db.String(1024), index=True, nullable=False)
     title = db.Column(db.String(255))
     content_hash = db.Column(db.String(64), unique=True, index=True)
-    
     # Text content fields
     original_text = db.Column(db.Text)
     processed_text = db.Column(db.Text)
@@ -20,7 +19,10 @@ class AudioContent(db.Model):
     file_path = db.Column(db.String(1024))
     duration = db.Column(db.Float)  # In seconds
     voice = db.Column(db.String(50))
-    
+    # Add this to the AudioContent class
+    feed_id = db.Column(db.Integer, db.ForeignKey('rss_feed.id', name='fk_audio_content_feed'), nullable=True)
+
+    # feed_id = db.Column(db.Integer, db.ForeignKey('rss_feed.id'), nullable=True)
     # Processing metadata
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
@@ -67,7 +69,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     is_active = db.Column(db.Boolean, default=True)
-    
+    feeds = db.relationship('RssFeed', backref='user', lazy='dynamic') 
     # User preferences
     preferred_voice = db.Column(db.String(50))
     

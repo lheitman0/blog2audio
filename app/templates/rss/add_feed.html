@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Add RSS Feed | Blog2Audio{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Add RSS Feed</h1>
+    <p class="lead">Subscribe to a blog or website RSS feed</p>
+    
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ url_for('rss.add_feed') }}" method="post">
+                <div class="form-group">
+                    <label for="url">RSS Feed URL</label>
+                    <input type="url" id="url" name="url" class="form-control" 
+                           placeholder="https://example.com/feed" required>
+                    <small class="form-text text-muted">
+                        Enter the URL of the RSS feed. If you're not sure, try adding "/feed" to the end of the blog URL.
+                    </small>
+                </div>
+                
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Feed
+                    </button>
+                    <a href="{{ url_for('rss.list_feeds') }}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <h3>Not sure where to find the RSS feed?</h3>
+        <p>Most blogs and news sites have RSS feeds. Here are some common patterns:</p>
+        <ul>
+            <li>WordPress blogs: <code>https://example.com/feed</code></li>
+            <li>Substack: <code>https://[name].substack.com/feed</code></li>
+            <li>Medium: <code>https://medium.com/feed/@username</code></li>
+        </ul>
+        <p>You can also try looking for the RSS icon <i class="fas fa-rss"></i> on the website.</p>
+    </div>
+</div>
+{% endblock %}
