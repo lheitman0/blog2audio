@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Processing Your Audio | Blog2Audio{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="processing-card">
+        <div class="card-header">
+            <h1>Processing Your Audio</h1>
+            <p class="lead">Please wait while we convert your blog post to audio</p>
+        </div>
+        <div class="card-body">
+            <div class="processing-status">
+                <div class="status-indicator">
+                    <div class="spinner"></div>
+                    <div id="status-text">Processing...</div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div id="progress-value" class="progress-value"></div>
+                    </div>
+                    <div id="progress-text" class="progress-text">Working on it...</div>
+                </div>
+            </div>
+            
+            <div class="processing-steps">
+                <div class="step" id="step-1">
+                    <div class="step-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="step-content">
+                        <h3>Extracting Content</h3>
+                        <p>Reading blog content from the source</p>
+                    </div>
+                    <div class="step-status">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                </div>
+                
+                <div class="step" id="step-2">
+                    <div class="step-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="step-content">
+                        <h3>Processing Text</h3>
+                        <p>Preparing content for conversion</p>
+                    </div>
+                    <div class="step-status">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                
+                <div class="step" id="step-3">
+                    <div class="step-icon">
+                        <i class="fas fa-microphone"></i>
+                    </div>
+                    <div class="step-content">
+                        <h3>Generating Audio</h3>
+                        <p>Converting text to speech</p>
+                    </div>
+                    <div class="step-status">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                
+                <div class="step" id="step-4">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="step-content">
+                        <h3>Finalizing</h3>
+                        <p>Preparing your audio file</p>
+                    </div>
+                    <div class="step-status">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="loading-message" class="loading-message">
+                <p>Processing may take a minute or two depending on the length of the blog post.</p>
+            </div>
+            
+            <div id="error-message" class="error-message" style="display: none;">
+                <p>An error occurred during processing:</p>
+                <div id="error-details"></div>
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">Try Again</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const contentId = {{content.id}};
+        const statusText = document.getElementById('status-text');
+        const progressValue = document.getElementById('progress-value');
+        const progressText = document.getElementById('progress-text');
+        const loadingMessage = document.getElementById('loading-message');
+        const errorMessage = document.getElementById('error-message');
+        const errorDetails = document.getElementById('error-details');
+        
+        const steps = [
+            document.getElementById('step-1'),
+            document.getElementById('step-2'),
+            document.getElementById('step-3'),
+            document.getElementById('step-4')
+        ];
+        
+        let currentStep = 0;
+        let checkInterval;
+        
+        function updateStepStatus(step, status) {
+            const statusIcons = {
+                'waiting': '<i class="fas fa-clock"></i>',
+                'processing': '<i class="fas fa-spinner fa-spin"></i>',
+                'completed': '<i class="fas fa-check"></i>',
+                'error': '<i class="fas fa-exclamation-circle"></i>'
+            };
+            
+            steps[step].querySelector('.step-status').innerHTML = statusIcons[status];
+            
+            if (status === 'processing') {
+                steps[step].classList.add('active');
+            } else if (status === 'completed') {
+                steps[step].classList.remove('active');
+                steps[step].classList.add('completed');
+            } else if (status === 'error') {
+                steps[step].classList.remove('active');
+                steps[step].classList.add('error');
+            }
+        }
+        
+        function setProgress(percent) {
+            progressValue.style.width = `${percent}%`;
+            progressText.textContent = `${percent}% complete`;
+        }
+        
+        function checkStatus() {
+            fetch(`/status/${contentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Status update:', data);
+                    
+                    if (data.status === 'processing') {
+                        // Update progress (simulated for now)
+                        if (currentStep === 0) {
+                            updateStepStatus(0, 'processing');
+                            setProgress(25);
+                            currentStep = 1;
+                        } else if (currentStep === 1) {
+                            updateStepStatus(0, 'completed');
+                            updateStepStatus(1, 'processing');
+                            setProgress(50);
+                            currentStep = 2;
+                        }
+                    } else if (data.status === 'error') {
+                        clearInterval(checkInterval);
+                        updateStepStatus(currentStep, 'error');
+                        statusText.textContent = 'Error';
+                        statusText.classList.add('error');
+                        loadingMessage.style.display = 'none';
+                        errorMessage.style.display = 'block';
+                        errorDetails.textContent = data.error || 'Unknown error occurred';
+                    } else if (data.status === 'completed' || data.is_processed) {
+                        clearInterval(checkInterval);
+                        for (let i = 0; i <= 3; i++) {
+                            updateStepStatus(i, 'completed');
+                        }
+                        setProgress(100);
+                        statusText.textContent = 'Complete!';
+                        statusText.classList.add('success');
+                        
+                        // Redirect to the result page
+                        setTimeout(function() {
+                            window.location.href = `/result/${contentId}`;
+                        }, 1000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking status:', error);
+                });
+        }
+        
+        // Initial step
+        updateStepStatus(0, 'processing');
+        setProgress(10);
+        
+        // Check status every 3 seconds
+        checkStatus(); // Initial check
+        checkInterval = setInterval(checkStatus, 3000);
+        
+        // Display random loading messages
+        const loadingMessages = [
+            "Converting words to speech...",
+            "Crafting your audio experience...",
+            "Preparing for your listening pleasure...",
+            "Almost there! Finalizing your audio...",
+            "Adding some audio magic to your blog post..."
+        ];
+        
+        let messageInterval = setInterval(function() {
+            const randomIndex = Math.floor(Math.random() * loadingMessages.length);
+            loadingMessage.innerHTML = `<p>${loadingMessages[randomIndex]}</p>`;
+        }, 5000);
+        
+        // Clear intervals if page is left
+        window.addEventListener('beforeunload', function() {
+            clearInterval(checkInterval);
+            clearInterval(messageInterval);
+        });
+    });
+</script>
+{% endblock %}

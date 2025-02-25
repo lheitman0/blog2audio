@@ -112,7 +112,11 @@ def process_content_background(content_id, voice):
     """
     Background task to process content
     """
-    with current_app.app_context():
+    # Import the app outside of the function to avoid circular imports
+    from run import app
+    
+    # Use the imported app to create a context
+    with app.app_context():
         content = AudioContent.query.get(content_id)
         if not content:
             return
@@ -161,7 +165,9 @@ def process_content_background(content_id, voice):
             )
             
             # Update database record
-            content.file_path = audio_path
+            # content.file_path = audio_path
+            rel_path = os.path.join('static', 'audio', os.path.basename(audio_path))
+            content.file_path = rel_path  # Store the relative path for web access
             content.voice = voice
             content.duration = converter.get_audio_duration(audio_path)
             content.is_processed = True

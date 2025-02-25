@@ -5,7 +5,16 @@ from langdetect import detect
 import logging
 from bs4 import BeautifulSoup
 from app.config import Config
+import ssl
 
+# Fix SSL certificate issues for NLTK
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+    
 # Download NLTK data on first run
 try:
     nltk.data.find('tokenizers/punkt')
