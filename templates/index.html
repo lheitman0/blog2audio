@@ -1,19 +1,119 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>URL to Audio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Enter a URL</h1>
-        <form action="/process" method="post">
-            <input type="text" id="url" name="url" placeholder="Enter URL here">
-            <button type="submit">Submit</button>
-        </form>
+{% extends "base.html" %}
+
+{% block title %}Blog2Audio - Convert Blog Posts to Audio{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <h1>Blog2Audio</h1>
+    <p class="lead">Listen to your favorite blogs on the go</p>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2>Convert a Blog Post to Audio</h2>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('main.process_url') }}" method="post">
+                <div class="form-group">
+                    <label for="url">Blog URL</label>
+                    <input type="url" id="url" name="url" class="form-control" 
+                           placeholder="https://example.com/blog-post" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="voice">Select Voice</label>
+                    <select id="voice" name="voice" class="form-control">
+                        {% for voice in config['AVAILABLE_VOICES'] %}
+                            <option value="{{ voice }}" {% if voice == config['DEFAULT_VOICE'] %}selected{% endif %}>
+                                {{ voice|capitalize }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-headphones"></i> Convert to Audio
+                </button>
+            </form>
+        </div>
     </div>
-</body>
-</html>
+    
+    <div class="features-section">
+        <h2>Features</h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <i class="fas fa-globe"></i>
+                <h3>Any Blog or Article</h3>
+                <p>Convert virtually any blog post or article from across the web</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-microphone-alt"></i>
+                <h3>Natural Voices</h3>
+                <p>Listen to content in high-quality, natural-sounding voices</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-file-download"></i>
+                <h3>Download Audio</h3>
+                <p>Save audio files to listen offline anytime</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>Mobile Friendly</h3>
+                <p>Works great on all your devices</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Paste URL</h3>
+                    <p>Enter the URL of any blog post or article</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Choose Voice</h3>
+                    <p>Select your preferred voice from our options</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Listen or Download</h3>
+                    <p>Play the audio directly or save for later</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.querySelector('form');
+        const urlInput = document.getElementById('url');
+        
+        form.addEventListener('submit', function(event) {
+            let isValid = true;
+            
+            // Basic URL validation
+            if (!urlInput.value.match(/^https?:\/\/.+\..+/)) {
+                alert('Please enter a valid URL starting with http:// or https://');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}
